@@ -1,0 +1,3 @@
+module Cachable
+  # Your code goes here...
+end
