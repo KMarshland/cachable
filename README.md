@@ -1,8 +1,18 @@
 # Cachable
-Short description and motivation.
+Caching is often a bother. This gem allows you to simply wrap your code in a block and have it be cached with redis.
 
 ## Usage
-How to use my plugin.
+In your model:
+
+```ruby
+include Cachable
+
+def your_method
+  unless_cached do 
+    # ... output of this will be cached    
+  end
+end
+```
 
 ## Installation
 Add this line to your application's Gemfile:
@@ -11,15 +21,6 @@ Add this line to your application's Gemfile:
 gem 'cachable'
 ```
 
-And then execute:
-```bash
-$ bundle
-```
-
-Or install it yourself as:
-```bash
-$ gem install cachable
-```
 
 ## Contributing
 Contribution directions go here.

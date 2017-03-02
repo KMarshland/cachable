@@ -10,8 +10,8 @@ Gem::Specification.new do |s|
   s.authors     = ["Kai Marshland"]
   s.email       = ["kaimarshland@gmail.com"]
   s.homepage    = "https://github.com/KMarshland/cachable"
-  s.summary     = "Abstraction"
-  s.description = "TODO: Description of Cachable."
+  s.summary     = "Easily add caching to models"
+  s.description = "Easily add caching to models"
   s.license     = "MIT"
 
   s.files = Dir["{app,config,db,lib}/**/*", "MIT-LICENSE", "Rakefile", "README.md"]
