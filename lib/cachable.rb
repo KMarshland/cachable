@@ -36,6 +36,7 @@ module Cachable
     # opts[:key]. If present, will be added to the base key to generate the full key. Defaults to the name of the caller.
     # opts[:json]. If true, will serialize and deserialize the result as json
     # opts[:expiration]. Time for which to cache the result. Defaults to 1 day
+    # opts[:json_options]. Options that get passed into json serialization and deserialization
     def unless_cached(opts={})
       partial_key = opts[:key].present? ? opts[:key] : caller.first.match(/`[^']*/).to_s[1..-1]
       key = "#{self.base_redis_key}_#{partial_key}"
@@ -107,7 +108,7 @@ module Cachable
 
       cached = $redis.get(key)
       if cached.present?
-        cached = JSON(cached) if opts[:json]
+        cached = JSON.parse(cached, opts[:json_options]) if opts[:json]
 
         return cached
       end
@@ -116,7 +117,7 @@ module Cachable
 
       unless opts[:skip_cache]
         if opts[:json]
-          $redis.set(key, JSON(result))
+          $redis.set(key, JSON.generate(result, opts[:json_options]))
         else
           $redis.set(key, result)
         end
