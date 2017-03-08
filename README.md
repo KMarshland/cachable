@@ -107,6 +107,26 @@ If you want to use the `delete_from_cache` method directly in an `after_commit` 
 delete_from_cache(:key1, :key2, after_commit: true)
 ```
 
+### Batch requests to the cache
+Oftentimes, you want the output of a given method on an ActiveRecordCollection. 
+You could loop through each record in the collection, but if you expect the method to be cached, 
+it's much more efficient this gem's method, and avoid the memory overhead and extra database calls. 
+
+Imagine you have a model that looks as follows: 
+```ruby
+class Book < ActiveRecord::Base
+  include Cachable
+  
+  def summary
+    unless_cached do
+      'Some summary'
+    end
+  end
+end
+```
+To get the summaries of all fantasy books, you might 
+
+
 ### Adding an additional redis key
 Sometimes your cache depends on more than just the model. 
 For example, imagine you have a model book that `belongs_to` an author. 
