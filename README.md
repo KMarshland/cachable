@@ -107,6 +107,25 @@ If you want to use the `delete_from_cache` method directly in an `after_commit` 
 delete_from_cache(:key1, :key2, after_commit: true)
 ```
 
+### Adding an additional redis key
+Sometimes your cache depends on more than just the model. 
+For example, imagine you have a model book that `belongs_to` an author. 
+When the author is updated, you want the cache to become invalidated.
+In your book model, you might have something like this:
+```ruby
+def added_redis_key
+  self.author.updated_at.to_i
+end
+
+def self.added_redis_key
+  first = all.first
+  return '' if first.blank?
+
+  first.author.updated_at.to_i
+end
+
+```
+
 ### Using the cache outside of a specific instance
 Sometimes you need to cache something in a static (class) method. It accepts the following options:
 - json. If true, will serialize and deserialize the result as json
