@@ -65,13 +65,19 @@ module Cachable
       added_key = ''
       added_key = "_#{self.added_redis_key}" if self.respond_to? :added_redis_key
 
+      batch_key_list = []
+      record_count = 0
+
       opts[:skip_cache] = !opts[:force_cache]
 
       iterator.each do |batch|
         factors = batch.pluck(:id, :updated_at)
+        record_count += factors.length if opts[:clear_previous_batch]
 
         if opts[:cache_batches]
           batch_key = "#{self.to_s.downcase}_#{factors.flatten.join(',')}#{added_key}_#{partial_key}"
+          batch_key_list << batch_key if opts[:clear_previous_batch]
+
           existing_result = $redis.get batch_key
           if existing_result.present?
             result.concat JSON(existing_result)
@@ -97,6 +103,25 @@ module Cachable
           expiration = 15.minutes unless expiration.present?
           $redis.expire batch_key, expiration unless expiration === false
         end
+      end
+
+      if opts[:clear_previous_batch]
+
+        # store the keys for the current batch list
+        expiration = opts[:expiration]
+        expiration = 15.minutes unless expiration.present?
+
+        gen_key -> n {
+          "#{self.to_s.downcase}_keys_#{n}_#{added_key}_#{partial_key}"
+        }
+        batch_key = gen_key[record_count]
+
+        $redis.set(batch_key, JSON(batch_key_list))
+        $redis.expire(batch_key, expiration)
+
+        # delete the keys from the previous batch list
+        $redis.del(gen_key[record_count - 1])
+        $redis.del(gen_key[record_count + 1])
       end
 
       result

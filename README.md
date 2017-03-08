@@ -131,7 +131,7 @@ Note that this will remove any ordering on the collection unless you set the slu
  - force_cache. If true will add its own cache, regardless of what the underlying function does. 
  - cache_batches. If true will add another layer of caching outside each individual model. This caches a the result of up to 50 records at a time, which can drastically speed up the cache but will also increase the cache size. 
  - skip_result. If true will not return the result, but it will still prepopulate the cache, which can avoid memory overhead.
- - clear_previous_batch. If true, and was also true previous times, it will remove the cached batches for the previous batch. This can be very useful when you are frequently adding more records and want to keep the redis memory usage down.  
+ - clear_previous_batch. If true, and was also true previous times, it will remove the cached batches for the previous batch. This can be very useful when you are frequently adding more records and want to keep the redis memory usage down. Note that this was designed to have minimal overhead, and so was based on the total number of records, which may cause a small number of stale keys to stay in memory.  
  - You can also pass in all normal unless_cached options, such as expiration, json, and json_options.  
 
 
