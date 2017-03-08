@@ -8,8 +8,19 @@ Add this line to your application's Gemfile:
 gem 'cachable'
 ```
 
+You must also add redis to your app. On heroku, you can add [Heroku Redis](https://elements.heroku.com/addons/heroku-redis).
+
 ## Usage
-At its hearty, this gem is the `unless_cached` method. In your model:
+At its hearty, this gem is the `unless_cached` method. 
+Although no options are required, it accepts the following:
+ - key. If present, will be added to the base key to generate the full key. Defaults to the name of the caller.
+ - json. If true, will serialize and deserialize the result as json
+ - expiration Time for which to cache the result. Defaults to 1 day
+ - json_options. Options that get passed into json serialization and deserialization
+ - skip_cache. If true, will not populate the cache -- this can be used if you populate the cache elsewhere, but still want to check if there's something there. 
+
+### Examples
+In your model:
 
 ```ruby
 include Cachable
@@ -94,6 +105,18 @@ end
 If you want to use the `delete_from_cache` method directly in an `after_commit` callback, you must specify that in the options.
 ```ruby
 delete_from_cache(:key1, :key2, after_commit: true)
+```
+
+### Using the cache outside of a specific instance
+Sometimes you need to cache something in a static (class) method. It accepts the following options:
+- json. If true, will serialize and deserialize the result as json
+- expiration Time for which to cache the result. Defaults to 1 day
+- json_options. Options that get passed into json serialization and deserialization
+- skip_cache. If true, will not populate the cache -- this can be used if you populate the cache elsewhere, but still want to check if there's something there. 
+```ruby
+self.class.unless_cached_base("#{self.class.to_s.downcase}_key", json: true, expiration: 1.day) do
+ # this output will be cached under the key your_model_name_key
+end
 ```
 
 ## License
