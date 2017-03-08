@@ -50,9 +50,51 @@ unless_cached(json: true, json_options: {allow_nan: true}) do
 end
 ```
 
+## Other features
 
-## Contributing
-Contribution directions go here.
+### Deleting from the cache
+Sometimes you want to delete something from the cache. 
+This can be done using the `delete_from_cache` method, which takes in one or more keys. 
+These keys are either the 
+```ruby
+delete_from_cache(:key1, :key2)
+```
+
+A special use case is after the changes have been committed. 
+For this, you can use the special `purge_cache` callback. 
+You must define the `tracked_cache_keys` method for this to work properly. 
+The following example will clear the cache for `cached_a` and `cached_b`, but not `cached_c`.
+```ruby
+# in your model
+after_commit :purge_cache
+
+def tracked_cache_keys
+  [:cached_a, :cached_b]
+end
+
+def cached_a
+  unless_cached do 
+    # ...
+  end
+end
+
+def cached_b
+  unless_cached do 
+    # ...
+  end
+end
+
+def cached_c
+  unless_cached do 
+    # ...
+  end
+end
+```
+
+If you want to use the `delete_from_cache` method directly in an `after_commit` callback, you must specify that in the options.
+```ruby
+delete_from_cache(:key1, :key2, after_commit: true)
+```
 
 ## License
 The gem is available as open source under the terms of the [MIT License](http://opensource.org/licenses/MIT).
