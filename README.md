@@ -63,6 +63,26 @@ end
 
 ## Other features
 
+### Configuring the redis connection
+It defaults to checking the `REDIS_URL` and the `HEROKU_REDIS_URL` environment variables to make a connection to redis. 
+However, you may wish to change the way you connect to redis. Create an initializer in `config/initializers/cachable.rb`. 
+```ruby
+Cachable::configure do |config|
+  
+  # set a lambda to get a redis connection
+  config.redis_connection = -> {
+    Redis.new
+  }
+  
+  # set the redis instance directly
+  config.redis_instance = Redis.new
+  
+  # or set the redis url
+  config.redis_url = 'YOUR REDIS URL'
+  
+end
+```
+
 ### Deleting from the cache
 Sometimes you want to delete something from the cache. 
 This can be done using the `delete_from_cache` method, which takes in one or more keys. 
