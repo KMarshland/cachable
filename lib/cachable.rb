@@ -1,3 +1,5 @@
+require 'cachable/configuration'
+
 module Cachable
 
   extend ActiveSupport::Concern
@@ -21,7 +23,7 @@ module Cachable
     def delete_from_cache(*keys, **opts)
       base_key = self.base_redis_key opts
       keys.each do |key|
-        $redis.del "#{base_key}_#{key}"
+        Cachable::redis.del "#{base_key}_#{key}"
       end
     end
 
@@ -78,7 +80,7 @@ module Cachable
           batch_key = "#{self.to_s.downcase}_#{factors.flatten.join(',')}#{added_key}_#{partial_key}"
           batch_key_list << batch_key if opts[:clear_previous_batch]
 
-          existing_result = $redis.get batch_key
+          existing_result = Cachable::redis.get batch_key
           if existing_result.present?
             result.concat JSON(existing_result)
             next
@@ -98,10 +100,10 @@ module Cachable
         result.concat batch_result unless opts[:skip_result]
 
         if opts[:cache_batches]
-          $redis.set batch_key, JSON(batch_result)
+          Cachable::redis.set batch_key, JSON(batch_result)
           expiration = opts[:expiration]
           expiration = 15.minutes unless expiration.present?
-          $redis.expire batch_key, expiration unless expiration === false
+          Cachable::redis.expire batch_key, expiration unless expiration === false
         end
       end
 
@@ -116,12 +118,12 @@ module Cachable
         }
         batch_key = gen_key[record_count]
 
-        $redis.set(batch_key, JSON(batch_key_list))
-        $redis.expire(batch_key, expiration)
+        Cachable::redis.set(batch_key, JSON(batch_key_list))
+        Cachable::redis.expire(batch_key, expiration)
 
         # delete the keys from the previous batch list
-        $redis.del(gen_key[record_count - 1])
-        $redis.del(gen_key[record_count + 1])
+        Cachable::redis.del(gen_key[record_count - 1])
+        Cachable::redis.del(gen_key[record_count + 1])
       end
 
       result
@@ -133,7 +135,7 @@ module Cachable
     def self.unless_cached_base(key, opts={})
       opts[:json] = true if opts[:json].nil?
 
-      cached = $redis.get(key)
+      cached = Cachable::redis.get(key)
       if cached.present?
         cached = JSON.parse(cached, opts[:json_options]) if opts[:json]
 
@@ -144,14 +146,14 @@ module Cachable
 
       unless opts[:skip_cache]
         if opts[:json]
-          $redis.set(key, JSON.generate(result, opts[:json_options]))
+          Cachable::redis.set(key, JSON.generate(result, opts[:json_options]))
         else
-          $redis.set(key, result)
+          Cachable::redis.set(key, result)
         end
 
         expiration = opts[:expiration]
         expiration = 1.day unless expiration.present?
-        $redis.expire(key, expiration) unless expiration === false
+        Cachable::redis.expire(key, expiration) unless expiration === false
       end
 
       result

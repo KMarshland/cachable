@@ -1,11 +1,11 @@
 
 module Cachable
   class Configuration
-    attr_accessible :redis_connection, :redis_instance, :redis_url
+    attr_accessor :redis_connection, :redis_instance, :redis_url
 
     def redis
       return @redis_connection.call if @redis_connection.present?
-      return @redis_instance if @redis_connection.present?
+      return @redis_instance if @redis_instance.present?
 
 
       @redis_url = ENV['REDIS_URL'] || ENV['HEROKU_REDIS_URL']
@@ -16,14 +16,16 @@ module Cachable
     end
   end
 
-  def self.configure
+  def self.configuration
     @config ||= Configuration.new
+  end
 
-    yield @config
+  def self.configure
+    yield self.configuration
   end
 
   def self.redis
-    @config.redis
+    self.configuration.redis
   end
 
 end
