@@ -124,7 +124,15 @@ class Book < ActiveRecord::Base
   end
 end
 ```
-To get the summaries of all fantasy books, you might 
+To get the summaries of all fantasy books, you could run `Book.where(genre: 'fantasy').unless_cached(:summary)`.
+
+Note that this will remove any ordering on the collection unless you set the slurp option to true or include `EachInOrder` in your model (this gem has not yet been released -- create an issue if you need me to release it). A full list of options is as follows:
+ - slurp. If true will not pull the records in in batches, which increases memory overhead but preserves order.
+ - force_cache. If true will add its own cache, regardless of what the underlying function does. 
+ - cache_batches. If true will add another layer of caching outside each individual model. This caches a the result of up to 50 records at a time, which can drastically speed up the cache but will also increase the cache size. 
+ - skip_result. If true will not return the result, but it will still prepopulate the cache, which can avoid memory overhead.
+ - clear_previous_batch. If true, and was also true previous times, it will remove the cached batches for the previous batch. This can be very useful when you are frequently adding more records and want to keep the redis memory usage down.  
+ - You can also pass in all normal unless_cached options, such as expiration, json, and json_options.  
 
 
 ### Adding an additional redis key

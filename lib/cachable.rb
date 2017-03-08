@@ -48,9 +48,11 @@ module Cachable
 
     # Calls unless cached on all records passed
     # action
+    # opts[:slurp]. If true will not pull the records in in batches, which increases memory overhead but preserves order.
     # opts[:force_cache]. If true will add its own cache, regardless of what the underlying function does
     # opts[:cache_batches]. If true will add another layer of caching outside
     # opts[:skip_result]. If true will not generate (useful for prepopulating the cache with lower overhead)
+    # opts[clear_previous_batch] If true, and was also true previous times, it will remove the cached batches for the previous batch. This can be very useful when you are frequently adding more records and want to keep the redis memory usage down.
     # Can also pass in all normal unless_cached options
     def self.unless_cached(action, opts={})
       result = []
